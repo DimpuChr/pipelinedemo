@@ -50,13 +50,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Minikube') {
             steps {
-                script {
-                    sh "kubectl apply -f deployment.yaml -n ${env.KUBE_NAMESPACE}"
+                withCredentials([file(credentialsId: 'minikube-kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl apply -f deployment.yml'
                 }
             }
         }
+
     }
 
     post {
