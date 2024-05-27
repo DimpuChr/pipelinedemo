@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'dimpuchr/dimpu/dockerimage'
+            image 'dimpuchr/dimpu:dockerimage'
         }
     }
 
