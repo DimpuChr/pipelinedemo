@@ -20,7 +20,13 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                //sh 'mvn clean package'
+                 // Convert the Windows workspace path to a Unix-style path
+                    def unixWorkspace = "${WORKSPACE}".replace('\\', '/').replace('C:', '/mnt/c')
+
+                    // Run the build steps inside the Docker container with the Unix-style path
+                    docker.image('dimpuchr/dimpu:dockerimage').inside("-v ${unixWorkspace}:/workspace -w /workspace") {
+                        sh 'mvn clean package'
             }
         }
 
