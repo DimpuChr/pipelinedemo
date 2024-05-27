@@ -32,14 +32,6 @@ pipeline {
             }
         }
 
-        stage('Verify kubectl context') {
-             steps {
-                        // Verify kubectl context
-                  sh 'kubectl config current-context'
-                  sh 'kubectl cluster-info'
-                    }
-             }
-
         stage('Docker Push') {
             steps {
                 script {
