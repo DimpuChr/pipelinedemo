@@ -6,15 +6,15 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/your-image-name'
+        DOCKER_IMAGE = 'dimpuchr/pipeline-demo'
         KUBE_NAMESPACE = 'default'
-        KUBE_DEPLOYMENT_NAME = 'springboot-app'
+        KUBE_DEPLOYMENT_NAME = 'pipeline-demo'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-repo/springboot-app.git'
+                git 'https://github.com/DimpuChr/pipelinedemo.git'
             }
         }
 

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-demo
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipeline-demo
+  template:
+    metadata:
+      labels:
+        app: pipeline-demo
+    spec:
+      containers:
+        - name: pipeline-demo
+          image: dimpuchr/pipeline-demo:latest
+          ports:
+            - containerPort: 8080
