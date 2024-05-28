@@ -2,19 +2,62 @@ pipeline {
     agent {
         docker {
             image 'dimpuchr/dimpu:dockerimage'
-            args "-v \"C:/Program Files/Jenkins/workspace/pipelinedemo:/workspace/pipelinedemo\" -w \"/workspace/pipelinedemo\""
         }
     }
+
+    environment {
+        DOCKER_IMAGE = 'dimpuchr/pipeline-demo'
+        KUBE_NAMESPACE = 'default'
+        KUBE_DEPLOYMENT_NAME = 'pipeline-demo'
+    }
+
     stages {
-        stage('Run Docker Container') {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/DimpuChr/pipelinedemo.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+               sh 'mvn clean package'
+            }
+        }
+
+        stage('Docker Build') {
             steps {
                 script {
-                    // Run commands inside the Docker container
-                    //sh 'mvn clean package'
-                    docker run --rm -v "C:/Program Files/Jenkins/workspace/pipelinedemo:/workspace/pipelinedemo" dimpuchr/dimpu:dockerimage mvn clean package
-                    // Additional commands can be added here
+                    dockerImage = docker.build("${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}", ".")
                 }
             }
         }
+
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        dockerImage.push("${env.BUILD_NUMBER}")
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Verify kubectl context') {
+            steps {
+                sh 'kubectl config current-context'
+                sh 'kubectl cluster-info'
+            }
+        }
+
+        stage('Deploy to Minikube') {
+            steps {
+                withCredentials([file(credentialsId: 'minikube-kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl apply -f deployment.yml'
+                }
+            }
+        }
+
     }
+
 }
