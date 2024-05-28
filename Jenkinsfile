@@ -10,7 +10,8 @@ pipeline {
             steps {
                 script {
                     // Run commands inside the Docker container
-                    sh 'mvn clean package'
+                    //sh 'mvn clean package'
+                    docker run --rm -v "C:/Program Files/Jenkins/workspace/pipelinedemo:/workspace/pipelinedemo" dimpuchr/dimpu:dockerimage mvn clean package
                     // Additional commands can be added here
                 }
             }
