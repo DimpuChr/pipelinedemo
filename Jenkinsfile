@@ -44,14 +44,20 @@ pipeline {
             )]) {
             script {
                 echo "Logging into Docker Hub as ${DOCKER_USER}"
-                sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
 
-                echo "Pushing image: ${IMAGE_NAME}:${IMAGE_TAG}"
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                echo "Pushing image to Docker Hub"
+                bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
         }
        }
       }
     }
 
   }
+  post {
+          always {
+              echo "Pipeline finished"
+              // Docker logout optional on Windows
+          }
+      }
 }
