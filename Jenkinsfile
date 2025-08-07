@@ -57,7 +57,6 @@ pipeline {
   post {
           always {
               echo "Pipeline finished"
-              // Docker logout optional on Windows remove
           }
       }
 }
