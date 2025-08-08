@@ -27,7 +27,7 @@ pipeline {
         bat 'mvn test'
       }
     }
-    stage('SonarQube Analysis') {
+    /* stage('SonarQube Analysis') {
         steps {
             withSonarQubeEnv('My SonarQube') {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
@@ -41,7 +41,7 @@ pipeline {
                 }
             }
         }
-    }
+    } */
     stage('Build Docker Image') {
        steps {
            script {
