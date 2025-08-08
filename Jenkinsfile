@@ -57,6 +57,7 @@ pipeline {
   post {
           always {
               echo "Pipeline finished"
+              //started git
           }
       }
 }
