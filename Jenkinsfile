@@ -6,10 +6,6 @@ pipeline {
           IMAGE_TAG = 'latest'             // You can change this to a dynamic tag later
       }
 
-      tools {
-              sonarScanner 'SonarScanner' // This name must match what you set above
-          }
-
 
   stages {
     stage('Checkout') {
