@@ -27,6 +27,21 @@ pipeline {
         bat 'mvn test'
       }
     }
+    stage('SonarQube Analysis') {
+        steps {
+            withSonarQubeEnv('My Local SonarQube') {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    bat """
+                        %SONAR_SCANNER_HOME%\\bin\\sonar-scanner.bat ^
+                        -Dsonar.projectKey=my-app ^
+                        -Dsonar.sources=. ^
+                        -Dsonar.host.url=http://localhost:9000 ^
+                        -Dsonar.login=%SONAR_TOKEN%
+                    """
+                }
+            }
+        }
+    }
     stage('Build Docker Image') {
        steps {
            script {
