@@ -29,7 +29,7 @@ pipeline {
     }
     stage('SonarQube Analysis') {
         steps {
-            withSonarQubeEnv('My Local SonarQube') {
+            withSonarQubeEnv('My SonarQube') {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                     bat """
                         %SONAR_SCANNER_HOME%\\bin\\sonar-scanner.bat ^
