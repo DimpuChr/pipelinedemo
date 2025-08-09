@@ -3,10 +3,28 @@ pipeline {
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
+          IMAGE_TAG  = ''
       }
 
 
   stages {
+  stage('Init') {
+              steps {
+                  script {
+                      // Get commit hash
+                      def gitCommit = bat(
+                          script: 'git rev-parse --short HEAD',
+                          returnStdout: true
+                      ).trim()
+
+                      // Set IMAGE_TAG globally
+                      env.IMAGE_TAG = "build-${env.BUILD_NUMBER}-${gitCommit}"
+
+                      echo "Using IMAGE_TAG: ${IMAGE_TAG}"
+                  }
+              }
+          }
+
     stage('Checkout') {
       steps {
         echo("checking out from scm")
@@ -41,25 +59,12 @@ pipeline {
             }
         }
     } */
-    stage('Set Commit Hash') {
-                steps {
-                    script {
-                        env.COMMIT_HASH = bat(
-                            script: 'git rev-parse --short HEAD',
-                            returnStdout: true
-                        ).trim()
-                        env.IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_HASH}"
-                    }
-                    echo "Commit hash: ${env.COMMIT_HASH}"
-                    echo "Image tag: ${env.IMAGE_TAG}"
-                }
-            }
 
    stage('Build Docker Image') {
        steps {
-           echo "Building Docker image: ${IMAGE_NAME}:${env.IMAGE_TAG}"
+           echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
            bat """
-               docker build -t ${IMAGE_NAME}:${env.IMAGE_TAG} .
+               docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
            """
        }
    }
@@ -76,7 +81,7 @@ pipeline {
                 bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
 
                 echo "Pushing versioned image"
-                bat "docker push ${IMAGE_NAME}:${env.IMAGE_TAG}"
+                bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
         }
        }
       }
@@ -99,7 +104,7 @@ pipeline {
 
                 // Update YAML image tag
                 bat """
-                  powershell -Command "(Get-Content deployment.yaml) -replace '(?<=image: ${IMAGE_NAME}:).*', '${env.IMAGE_TAG}' | Set-Content deployment.yaml"
+                  powershell -Command "(Get-Content deployment.yaml) -replace '(?<=image: ${IMAGE_NAME}:).*', '${IMAGE_TAG}' | Set-Content deployment.yaml"
                 """
 
                 // Commit & push change
@@ -107,7 +112,7 @@ pipeline {
                   git config user.name "DimpuChr"
                   git config user.email "bmdarshan.c@gmail.com"
                   git add deployment.yaml
-                  git commit -m "Update image tag to ${env.IMAGE_TAG}"
+                  git commit -m "Update image tag to ${IMAGE_TAG}"
                   git push origin develop
                 """
               }
