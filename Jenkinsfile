@@ -3,7 +3,7 @@ pipeline {
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
-          IMAGE_TAG = 'latest'             // You can change this to a dynamic tag later
+                    // You can change this to a dynamic tag later
       }
 
 
@@ -45,8 +45,16 @@ pipeline {
     stage('Build Docker Image') {
        steps {
            script {
+            // Generate tag: build number + short git hash
+               COMMIT_HASH = bat(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+               IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_HASH}"
+
                echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
-               docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+
+               bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+
+               // Also tag as latest
+               bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
            }
        }
     }
@@ -61,12 +69,48 @@ pipeline {
                 echo "Logging into Docker Hub as ${DOCKER_USER}"
                 bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
 
-                echo "Pushing image to Docker Hub"
+                echo "Pushing versioned image"
                 bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+
+                echo "Pushing latest tag"
+                bat "docker push ${IMAGE_NAME}:latest"
         }
        }
       }
     }
+
+    stage('Checkout Manifests Repo') {
+        steps {
+            // This is your separate Git repo where deployment.yaml lives
+            dir('manifests-repo') {
+            git branch: 'develop', url: 'https://github.com/DimpuChr/templates_demo.git'
+            }
+        }
+    }
+
+    stage('Update Deployment Manifest') {
+          steps {
+            dir('manifests-repo') {
+              script {
+                echo "Updating image tag in deployment.yaml"
+
+                // Update YAML image tag
+                bat """
+                  powershell -Command "(Get-Content deployment.yaml) -replace '(?<=image: ${IMAGE_NAME}:).*', '${IMAGE_TAG}' | Set-Content deployment.yaml"
+                """
+
+                // Commit & push change
+                bat """
+                  git config user.name "DimpuChr"
+                  git config user.email "bmdarshan.c@gmail.com"
+                  git add deployment.yaml
+                  git commit -m "Update image tag to ${IMAGE_TAG}"
+                  git push origin develop
+                """
+              }
+            }
+          }
+        }
 
   }
   post {
