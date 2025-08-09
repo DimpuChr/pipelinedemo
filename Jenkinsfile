@@ -1,9 +1,10 @@
+def IMAGE_TAG = ''
 pipeline {
   agent any
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
-          IMAGE_TAG  = '${env.BUILD_NUMBER}-latest'
+          //IMAGE_TAG  = '${env.BUILD_NUMBER}-latest'
       }
 
 
@@ -28,6 +29,14 @@ pipeline {
         bat 'mvn test'
       }
     }
+    stage('Set Image Tag') {
+          steps {
+            script {
+              IMAGE_TAG = "${env.BUILD_NUMBER}-latest"
+              echo "Using IMAGE_TAG = ${IMAGE_TAG}"
+            }
+          }
+        }
     /* stage('SonarQube Analysis') {
         steps {
             withSonarQubeEnv('My SonarQube') {
