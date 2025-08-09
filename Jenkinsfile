@@ -3,27 +3,11 @@ pipeline {
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
-          IMAGE_TAG  = ''
+          IMAGE_TAG  = 'latest'
       }
 
 
   stages {
-  stage('Init') {
-              steps {
-                  script {
-                      // Get commit hash
-                      def gitCommit = bat(
-                          script: 'git rev-parse --short HEAD',
-                          returnStdout: true
-                      ).trim()
-
-                      // Set IMAGE_TAG globally
-                      env.IMAGE_TAG = "build-${env.BUILD_NUMBER}-${gitCommit}"
-
-                      echo "Using IMAGE_TAG: ${IMAGE_TAG}"
-                  }
-              }
-          }
 
     stage('Checkout') {
       steps {
