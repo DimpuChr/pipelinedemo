@@ -3,7 +3,8 @@ pipeline {
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
-                    // You can change this to a dynamic tag later
+          COMMIT_HASH = ''
+          IMAGE_TAG = ''
       }
 
 
@@ -42,19 +43,29 @@ pipeline {
             }
         }
     } */
+    stage('Set Commit Hash') {
+                steps {
+                    script {
+                        COMMIT_HASH = bat(
+                            script: 'git rev-parse --short HEAD',
+                            returnStdout: true
+                        ).trim()
+                        IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_HASH}"
+                    }
+                    echo "Commit hash: ${COMMIT_HASH}"
+                    echo "Image tag: ${IMAGE_TAG}"
+                }
+            }
+
     stage('Build Docker Image') {
        steps {
            script {
-            // Generate tag: build number + short git hash
-               COMMIT_HASH = bat(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-               IMAGE_TAG = "build-${BUILD_NUMBER}-${COMMIT_HASH}"
-
-               echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
-
-               bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-
-               // Also tag as latest
-               bat "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+           steps {
+                  echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+                    bat """
+                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                       """
+              }
            }
        }
     }
@@ -71,9 +82,6 @@ pipeline {
 
                 echo "Pushing versioned image"
                 bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-
-                echo "Pushing latest tag"
-                bat "docker push ${IMAGE_NAME}:latest"
         }
        }
       }
