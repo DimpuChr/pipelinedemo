@@ -91,14 +91,16 @@ pipeline {
                   powershell -Command "(Get-Content deployment.yaml) -replace '(?<=image: ${IMAGE_NAME}:).*', '${IMAGE_TAG}' | Set-Content deployment.yaml"
                 """
 
-                // Commit & push change
-                bat """
-                  git config user.name "DimpuChr"
-                  git config user.email "bmdarshan.c@gmail.com"
-                  git add deployment.yaml
-                  git commit -m "Update image tag to ${IMAGE_TAG}"
-                  git push origin develop
-                """
+                 // Commit & push change with credentials
+                  withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                                    bat """
+                                      git config user.name "DimpuChr"
+                                      git config user.email "bmdarshan.c@gmail.com"
+                                      git add deployment.yaml
+                                      git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+                                      git push https://${GIT_USER}:${GIT_PASS}@github.com/dimpuchr/your-repo-name.git develop
+                                    """
+                  }
               }
             }
           }
