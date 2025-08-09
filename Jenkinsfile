@@ -57,18 +57,15 @@ pipeline {
                 }
             }
 
-    stage('Build Docker Image') {
+   stage('Build Docker Image') {
        steps {
-           script {
-           steps {
-                  echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
-                    bat """
-                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                       """
-              }
-           }
+           echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+           bat """
+               docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+           """
        }
-    }
+   }
+
     stage('Push to Docker Hub') {
         steps {
            withCredentials([usernamePassword(
