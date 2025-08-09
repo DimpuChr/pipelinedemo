@@ -98,7 +98,7 @@ pipeline {
                                       git config user.email "bmdarshan.c@gmail.com"
                                       git add deployment.yaml
                                       git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
-                                      git push https://${GIT_USER}:${GIT_PASS}@github.com/dimpuchr/your-repo-name.git develop
+                                      git push https://${GIT_USER}:${GIT_PASS}@github.com/dimpuchr/templates_demo.git develop
                                     """
                   }
               }
