@@ -87,10 +87,11 @@ pipeline {
                 echo "Updating image tag in deployment.yaml"
 
                 // Update YAML image tag
-                                bat """
-                                  powershell -Command "(Get-Content deployment.yaml) -replace '(?<=image: ${IMAGE_NAME}:).*', '${IMAGE_TAG}' | Set-Content deployment.yaml"
-                                """
+                bat """
+                powershell -Command "(Get-Content deployment.yaml) -replace 'image:\\s*${IMAGE_NAME}:.+', 'image: ${IMAGE_NAME}:${IMAGE_TAG}' | Set-Content deployment.yaml"
+                """
 
+                bat "type deployment.yaml"
                  // Commit & push change with credentials
                   withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                                     bat """
