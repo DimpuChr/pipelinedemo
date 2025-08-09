@@ -3,7 +3,7 @@ pipeline {
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
-          IMAGE_TAG  = 'latest'
+          IMAGE_TAG  = '${env.BUILD_NUMBER}-latest'
       }
 
 
