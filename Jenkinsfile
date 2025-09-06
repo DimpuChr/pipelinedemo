@@ -1,6 +1,7 @@
 def IMAGE_TAG = ''
 pipeline {
-  agent  { label 'docker-agent' }
+  #agent  { label 'docker-agent' }
+  agent any
 
   environment {
           IMAGE_NAME = 'dimpuchr/my-app'   // Your Docker Hub repo name
