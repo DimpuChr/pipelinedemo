@@ -1,6 +1,6 @@
 def IMAGE_TAG = ''
 pipeline {
-  #agent  { label 'docker-agent' }
+ 
   agent any
 
   environment {
